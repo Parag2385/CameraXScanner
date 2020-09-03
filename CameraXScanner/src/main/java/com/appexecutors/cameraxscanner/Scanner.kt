@@ -44,7 +44,8 @@ class Scanner : AppCompatActivity() {
         cameraXManager = CameraXManager(
             this,
             mBinding.viewFinder,
-            this
+            this,
+            mBinding.graphicOverlayFinder
         )
     }
 

@@ -6,18 +6,21 @@ import android.util.Log
 import android.view.ScaleGestureDetector
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import com.appexecutors.cameraxscanner.mlkit.BarcodeScannerProcessor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class CameraXManager(
     private val context: Context,
     private val viewFinder: PreviewView,
-    private val lifecycleOwner: LifecycleOwner
+    private val lifecycleOwner: LifecycleOwner,
+    private val graphicOverlayFinder: GraphicOverlay
 ) {
 
     private var lensFacing: Int = CameraSelector.LENS_FACING_BACK
@@ -26,6 +29,8 @@ class CameraXManager(
     private var camera: Camera? = null
     private lateinit var cameraExecutor: ExecutorService
     private var cameraProvider: ProcessCameraProvider? = null
+
+    private var imageAnalyzer: ImageAnalysis? = null
 
     companion object{
         const val TAG = "CameraXManager"
@@ -55,6 +60,13 @@ class CameraXManager(
                 else -> throw IllegalStateException("Back and front camera are unavailable")
             }
 
+            imageAnalyzer = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build()
+                .also {
+                    it.setAnalyzer(cameraExecutor, BarcodeScannerProcessor(graphicOverlayFinder))
+                }
+
             val cameraSelector = CameraSelector.Builder()
                 .requireLensFacing(lensFacing)
                 .build()
@@ -72,7 +84,8 @@ class CameraXManager(
             camera = cameraProvider?.bindToLifecycle(
                 lifecycleOwner,
                 cameraSelector,
-                preview
+                preview,
+                imageAnalyzer
             )
             preview?.setSurfaceProvider(
                 viewFinder.createSurfaceProvider()
