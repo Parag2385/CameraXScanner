@@ -17,7 +17,7 @@ open class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
     var mScale: Float? = null
     var mOffsetX: Float? = null
     var mOffsetY: Float? = null
-    var cameraSelector: Int = CameraSelector.LENS_FACING_BACK
+    private var cameraSelector: Int = CameraSelector.LENS_FACING_BACK
 
     abstract class Graphic(private val overlay: GraphicOverlay) {
 

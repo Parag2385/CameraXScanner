@@ -24,8 +24,8 @@ abstract class BaseImageAnalyzer<T> : ImageAnalysis.Analyzer {
                     )
                     imageProxy.close()
                 }
-                .addOnFailureListener {
-                    onFailure(it)
+                .addOnFailureListener { ex ->
+                    onFailure(ex)
                     imageProxy.close()
                 }
         }
